@@ -147,8 +147,9 @@ int init_mmap(int fd)
     return 0;
 }
  
-int capture_image(int fd)
+cv::Mat capture_image(int fd)
 {
+    cv::Mat convertedImage;
     struct v4l2_buffer buf = {0};
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
@@ -156,13 +157,13 @@ int capture_image(int fd)
     if(-1 == xioctl(fd, VIDIOC_QBUF, &buf))
     {
         perror("Query Buffer");
-        return 1;
+        //return 1;
     }
  
     if(-1 == xioctl(fd, VIDIOC_STREAMON, &buf.type))
     {
         perror("Start Capture");
-        return 1;
+        //return 1;
     }
  
     fd_set fds;
@@ -174,17 +175,17 @@ int capture_image(int fd)
     if(-1 == r)
     {
         perror("Waiting for Frame");
-        return 1;
+        //return 1;
     }
  
     if(-1 == xioctl(fd, VIDIOC_DQBUF, &buf))
     {
         perror("Retrieving Frame");
-        return 1;
+        //return 1;
     }
     
-    IplImage* frame;
-    cv::Mat convertedImage;
+    //IplImage* frame;
+   
     cv::Mat cvmat(480, 640, CV_8UC1, (void*)buffer);
     try
     {
@@ -194,10 +195,7 @@ int capture_image(int fd)
     {
         std::cout << "Cannot convert" << std::endl;
     }
-    cv::namedWindow("video");
-    cv::imshow("video", convertedImage);
-    cv::waitKey(1);
-    return 0;
+    return convertedImage;
 }
  
 int main()
@@ -218,8 +216,10 @@ int main()
         int i;
         while(true)
         {
-            if(capture_image(fd))
-                return 1;
+            cv::Mat frame = capture_image(fd); 
+            cv::namedWindow("video");
+            cv::imshow("video", frame);
+            cv::waitKey(1);   
         }
         close(fd);
         return 0;
