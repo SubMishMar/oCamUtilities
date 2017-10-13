@@ -237,12 +237,15 @@ int main(int argc, char** argv)
         int i;
         while(nh.ok())
         {
-           cv::Mat frame = capture_image(fd); 
-           if(!frame.empty()) 
+           cv::Mat frameBGR8 = capture_image(fd); 
+         
+           if(!frameBGR8.empty()) 
            {
-            cv::namedWindow("video");
-            cv::imshow("video", frame); 
-            msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", frame).toImageMsg();
+            cv::Mat frameGRAY;
+            cv::cvtColor(frameBGR8, frameGRAY, CV_BGR2GRAY);
+            //cv::namedWindow("video");
+            //cv::imshow("video", frame); 
+            msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", frameGRAY).toImageMsg();
             pub.publish(msg);
             cv::waitKey(1);
             
