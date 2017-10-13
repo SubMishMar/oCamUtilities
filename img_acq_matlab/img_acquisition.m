@@ -20,6 +20,7 @@ while(1)
         
         img = snapshot(cam);
         img = rgb2gray(img);
+        img = img(1:2:end,1:2:end);
         imwrite(img,strcat(foldername,sprintf('/img_%04d.png',i)));
         i = i + 1;
     end
