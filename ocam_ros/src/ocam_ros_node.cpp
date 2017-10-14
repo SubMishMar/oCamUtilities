@@ -245,7 +245,10 @@ int main(int argc, char** argv)
             cv::cvtColor(frameBGR8, frameGRAY, CV_BGR2GRAY);
             //cv::namedWindow("video");
             //cv::imshow("video", frame); 
+            
             msg = cv_bridge::CvImage(std_msgs::Header(), "mono8", frameGRAY).toImageMsg();
+            msg->header.stamp = ros::Time::now();
+            //ROS_INFO("%d",msg.header.stamp.toSec());
             pub.publish(msg);
             cv::waitKey(1);
             
