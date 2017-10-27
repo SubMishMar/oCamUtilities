@@ -1,0 +1,6 @@
+<launch>
+    <param name="video_device" value="/dev/video1" />
+    <param name="fps" value="30" />
+    <node name="ocam" pkg="ocam_ros" type="ocam_ros_node" output="screen">
+    </node>
+</launch>

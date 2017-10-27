@@ -18,6 +18,9 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <cv_bridge/cv_bridge.h>
 #include <sstream> // for converting the command line parameter to integer
+#include <string.h>
+
+using namespace std;
 uint8_t *buffer;
  
 static int xioctl(int fd, int request, void *arg)
@@ -208,6 +211,28 @@ int main(int argc, char** argv)
 
   ros::init(argc, argv, "image_publisher");
   ros::NodeHandle nh;
+
+  string vd;
+  if(!nh.getParam("video_device", vd))
+  	 {
+       ROS_ERROR("Failed to read video device name on param server");
+  	 }
+  else
+  	 {
+       ROS_INFO("Succeeded reading video device name from param server");
+  	 }
+
+  int fps;
+  if(!nh.getParam("fps", fps))
+     {
+       ROS_ERROR("Failed to read fps on param server");
+     }
+  else
+     {
+  	   ROS_INFO("Succeeded reading fps from param server");
+     }
+
+
   image_transport::ImageTransport it(nh);
   image_transport::Publisher pub = it.advertise("camera/image", 1);
 
@@ -215,28 +240,28 @@ int main(int argc, char** argv)
   cv::Mat frame;
   sensor_msgs::ImagePtr msg;
 
-  ros::Rate loop_rate(30);
+  ros::Rate loop_rate(fps);
 
 
 
 
 
-        int fd;
+   int fd;
  
-        fd = open("/dev/video1", O_RDWR);
-        if (fd == -1)
-        {
-                perror("Opening video device");
-                return 1;
-        }
-        if(print_caps(fd))
-            return 1;
+   fd = open(vd.c_str(), O_RDWR);
+   if (fd == -1)
+   {
+        perror("Opening video device");
+        return 1;
+   }
+   if(print_caps(fd))
+        return 1;
         
-        if(init_mmap(fd))
-            return 1;
-        int i;
-        while(nh.ok())
-        {
+   if(init_mmap(fd))
+        return 1;
+   int i;
+   while(nh.ok())
+    {
            cv::Mat frameBGR8 = capture_image(fd); 
          
            if(!frameBGR8.empty()) 
@@ -255,8 +280,8 @@ int main(int argc, char** argv)
            }
            ros::spinOnce();
            loop_rate.sleep();   
-        }
+    }
         
-        close(fd);
-        return 0;
+    close(fd);
+    return 0;
 }
