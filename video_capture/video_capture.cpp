@@ -198,11 +198,11 @@ cv::Mat capture_image(int fd)
     return convertedImage;
 }
  
-int main()
+int main(int argc, char** argv)
 {
         int fd;
  
-        fd = open("/dev/video1", O_RDWR);
+        fd = open(argv[1], O_RDWR);//accepts the name of the device as a string argument
         if (fd == -1)
         {
                 perror("Opening video device");
@@ -214,13 +214,18 @@ int main()
         if(init_mmap(fd))
             return 1;
         int i;
+        cv::namedWindow("video");
         while(true)
         {
             cv::Mat frame = capture_image(fd); 
-            cv::namedWindow("video");
+            if(!frame.empty())
+            {
+            cv::cvtColor(frame, frame, CV_BGR2GRAY);
             cv::imshow("video", frame);
-            cv::waitKey(1);   
+            cv::waitKey(1);
+            }   
         }
+        cv::destroyWindow("video");
         close(fd);
         return 0;
 }
